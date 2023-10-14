@@ -1,3 +1,4 @@
+import re 
 from flask import jsonify, request, url_for
 
 from . import app, db
@@ -20,7 +21,8 @@ def add_short_url():
     if len(short_id) > 16:
         raise InvalidAPIUsage('Указано недопустимое имя для короткой ссылки', 400)
     if URLMap.query.filter_by(short=short_id).first() is not None:
-        raise InvalidAPIUsage('Предложенный вариант короткой ссылки уже существует.')
+        raise InvalidAPIUsage('Предложенный вариант короткой ссылки уже существует.', 400)
+    print(short_id)
     if short_id.isalnum():
         urlmap = URLMap()
         data['original'] = data['url']
@@ -28,8 +30,10 @@ def add_short_url():
         urlmap.from_dict(data)
         db.session.add(urlmap)
         db.session.commit()
+        urlmap.short = url_for('redirect_view', short=urlmap.short, _external=True)
         return jsonify(url=urlmap.original, short_link=urlmap.short), 201
-    raise InvalidAPIUsage('Указано недопустимое имя для короткой ссылки', 400)
+    else:
+        raise InvalidAPIUsage('Указано недопустимое имя для короткой ссылки', 400)
 
 
 @app.route('/api/id/<string:short_id>/', methods=['GET'])
