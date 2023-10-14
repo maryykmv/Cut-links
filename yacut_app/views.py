@@ -18,18 +18,18 @@ def get_unique_short_id():
 def index_view():
     form = URLMapForm()
     if form.validate_on_submit():
-        short_url = form.custom_id.data
-        if short_url:
-            if URLMap.query.filter_by(short=short_url).first():
+        short_id = form.custom_id.data
+        if short_id:
+            if URLMap.query.filter_by(short=short_id).first():
                 flash('Предложенный вариант короткой ссылки уже существует.')
                 return render_template('index.html', form=form)
         else:
-            short_url = get_unique_short_id()
+            short_id = get_unique_short_id()
         urlmap = URLMap(
             original=form.original_link.data,
-            short=short_url
+            short=short_id
         )
-        form.custom_id.data = short_url
+        form.custom_id.data = short_id
         db.session.add(urlmap)
         db.session.commit()
         flash('Ваша новая ссылка готова:')
@@ -38,5 +38,5 @@ def index_view():
 
 @app.route('/<string:short>')
 def redirect_view(short):
-    short_url = URLMap.query.filter_by(short=short).first_or_404()
-    return redirect(short_url.original)
+    urlmap = URLMap.query.filter_by(short=short).first_or_404()
+    return redirect(urlmap.original)
