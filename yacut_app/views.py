@@ -1,4 +1,4 @@
-from random import randrange, random
+import random
 import string
 
 from flask import abort, flash, redirect, render_template, url_for
@@ -18,18 +18,25 @@ def get_unique_short_id():
 def index_view():
     form = URLMapForm()
     if form.validate_on_submit():
-        short = form.custom_id.data
-        if not short:
-            short = get_unique_short_id()
-        if URLMap.query.filter_by(short=short).first():
-            flash('Предложенный вариант короткой ссылки уже существует.')
-            return render_template('index.html', form=form)
+        short_url = form.custom_id.data
+        if short_url:
+            if URLMap.query.filter_by(short=short_url).first():
+                flash('Предложенный вариант короткой ссылки уже существует.')
+                return render_template('index.html', form=form)
+        else:
+            short_url = get_unique_short_id()
         urlmap = URLMap(
             original=form.original_link.data,
-            short=form.custom_id.data
+            short=short_url
         )
-
+        form.custom_id.data = short_url
         db.session.add(urlmap)
         db.session.commit()
-        return redirect(url_for('index_view', id=urlmap.id))
+        flash('Ваша новая ссылка готова:')
     return render_template('index.html', form=form)
+
+
+@app.route('/<string:short>')
+def redirect_view(short):
+    short_url = URLMap.query.filter_by(short=short).first_or_404()
+    return redirect(short_url.original)

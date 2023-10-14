@@ -11,6 +11,6 @@ class URLMapForm(FlaskForm):
     )
     custom_id = StringField(
         'Введите короткий идетификатор ссылки',
-        validators=[DataRequired(message='Обязательное поле'),
-                    Length(1, 16), Optional()]
+        validators=[Length(1, 16), Optional()]
     )
+    submit = SubmitField('Создать')
