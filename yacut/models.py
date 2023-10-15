@@ -1,13 +1,25 @@
 from datetime import datetime
+from http import HTTPStatus
+import random
+import re
+import string
+
+from flask import flash, url_for, render_template
 
 from . import db
+from .constants import (MAX_LENGTH_LONG_LINK, MAX_LENGTH_SHORT_ID,
+                        LENGTH_SHORT_ID, MESSAGE_NOT_EXISTS_BODY,
+                        CHAR_SET, MESSAGE_REQUIRED_FIELD,
+                        MESSAGE_INVALID_VALUE, MESSAGE_EXISTS_SHORT_URL,
+                        REDIRECT_VIEW, INDEX_TEMPLATE, MESSAGE_CREATE_URL)
+from .error_handlers import InvalidAPIUsage
 
 
 class URLMap(db.Model):
     __tablename__ = 'URLMap'
     id = db.Column(db.Integer, primary_key=True)
-    original = db.Column(db.String(256), nullable=False)
-    short = db.Column(db.String(16), unique=True)
+    original = db.Column(db.String(MAX_LENGTH_LONG_LINK), nullable=False)
+    short = db.Column(db.String(MAX_LENGTH_SHORT_ID), unique=True)
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
 
     def to_dict(self, value=False):
@@ -22,3 +34,60 @@ class URLMap(db.Model):
         for field in ['original', 'short']:
             if field in data:
                 setattr(self, field, data[field])
+
+    def get_unique_short_id(self):
+        short_id = ''.join(random.sample(
+            string.ascii_letters + string.digits, LENGTH_SHORT_ID))
+        if self.is_short_url_exists(short_id):
+            self.get_unique_short_id()
+        return short_id
+
+    def is_short_url_exists(self, short_id, first_404=False):
+        if first_404:
+            return self.query.filter_by(short=short_id).first_or_404()
+        return self.query.filter_by(short=short_id).first()
+
+    def data_api(self, data):
+        if data is None:
+            raise InvalidAPIUsage(MESSAGE_NOT_EXISTS_BODY)
+        if 'url' not in data:
+            raise InvalidAPIUsage(MESSAGE_REQUIRED_FIELD)
+        if ('custom_id' not in data or data['custom_id'] is None
+                or data['custom_id'] == ''):
+            short_id = self.get_unique_short_id()
+        else:
+            short_id = data['custom_id']
+        if (len(short_id) > MAX_LENGTH_SHORT_ID
+                or not re.fullmatch(CHAR_SET, short_id)):
+            raise InvalidAPIUsage(MESSAGE_INVALID_VALUE, HTTPStatus.BAD_REQUEST)
+        if self.is_short_url_exists(short_id) is not None:
+            raise InvalidAPIUsage(MESSAGE_EXISTS_SHORT_URL, HTTPStatus.BAD_REQUEST)
+        data['original'] = data['url']
+        data['short'] = short_id
+        self.from_dict(data)
+        db.session.add(self)
+        db.session.commit()
+        self.short = url_for(REDIRECT_VIEW, short=self.short, _external=True)
+        return self.to_dict(True)
+
+    def data_form(self, form):
+        short_id = form.custom_id.data
+        if short_id is None or short_id == '':
+            short_id = URLMap().get_unique_short_id()
+        else:
+            short_id = form.custom_id.data
+        if (len(short_id) > MAX_LENGTH_SHORT_ID
+                or not re.fullmatch(CHAR_SET, short_id)):
+            flash(MESSAGE_INVALID_VALUE)
+            short_id = URLMap().get_unique_short_id()
+        if URLMap().is_short_url_exists(short_id):
+            flash(MESSAGE_EXISTS_SHORT_URL)
+            return render_template(INDEX_TEMPLATE, form=form)
+        url_map = URLMap(
+            original=form.original_link.data,
+            short=short_id
+        )
+        form.custom_id.data = short_id
+        db.session.add(url_map)
+        db.session.commit()
+        flash(MESSAGE_CREATE_URL)
