@@ -32,7 +32,7 @@ def add_short_url():
     db.session.add(urlmap)
     db.session.commit()
     urlmap.short = url_for('redirect_view', short=urlmap.short, _external=True)
-    return jsonify(urlmap.to_dict()), HTTPStatus.CREATED
+    return jsonify(urlmap.to_dict(True)), HTTPStatus.CREATED
 
 
 @app.route('/api/id/<string:short_id>/', methods=['GET'])
@@ -40,4 +40,4 @@ def get_original_url(short_id):
     urlmap = URLMap.query.filter_by(short=short_id).first()
     if urlmap is None:
         raise InvalidAPIUsage(MESSAGE_NOT_FOUND, HTTPStatus.NOT_FOUND)
-    return jsonify(url=urlmap.original), HTTPStatus.OK
+    return jsonify(urlmap.to_dict()), HTTPStatus.OK
