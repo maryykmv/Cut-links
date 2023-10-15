@@ -47,11 +47,10 @@ API проекта доступен всем желающим. Сервис об
 
 
 ## Технологии
-- Python 3.7
+- Python 3.9
 - Flask 2.0
-- SQLAlchemy (через flask-sqlalchemy)
+- SQLAlchemy
 - SQLite
-- Bootstrap
 
 
 ## Как запустить проект
