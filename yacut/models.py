@@ -11,10 +11,8 @@ class URLMap(db.Model):
 
     def to_dict(self):
         return dict(
-            id=self.id,
-            original=self.original,
-            short=self.short,
-            timestamp=self.timestamp
+            url=self.original,
+            short_link=self.short
         )
 
     def from_dict(self, data):
