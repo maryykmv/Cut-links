@@ -1,4 +1,5 @@
 import random
+import re
 import string
 
 from flask import abort, flash, redirect, render_template, url_for
@@ -12,6 +13,10 @@ LENGTH_SHORT_ID = 6
 
 def get_unique_short_id():
     return ''.join(random.choice(string.ascii_letters + string.digits) for i in range(LENGTH_SHORT_ID))
+
+
+def check_symbols_short_id(short_id):
+    return re.fullmatch(r'[a-zA-Z0-9]+', short_id)
 
 
 @app.route('/', methods=['GET', 'POST'])

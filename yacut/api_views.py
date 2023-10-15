@@ -1,10 +1,9 @@
-import re 
 from flask import jsonify, request, url_for
 
 from . import app, db
 from .error_handlers import InvalidAPIUsage
 from .models import URLMap
-from .views import get_unique_short_id
+from .views import get_unique_short_id, check_symbols_short_id
 
 
 @app.route('/api/id/', methods=['POST'])
@@ -22,8 +21,7 @@ def add_short_url():
         raise InvalidAPIUsage('Указано недопустимое имя для короткой ссылки', 400)
     if URLMap.query.filter_by(short=short_id).first() is not None:
         raise InvalidAPIUsage('Предложенный вариант короткой ссылки уже существует.', 400)
-    print(short_id)
-    if short_id.isalnum():
+    if check_symbols_short_id(short_id):
         urlmap = URLMap()
         data['original'] = data['url']
         data['short'] = short_id
