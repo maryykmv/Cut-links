@@ -1,12 +1,6 @@
 LENGTH_SHORT_ID = 6
 MAX_LENGTH_SHORT_ID = 16
 MAX_LENGTH_LONG_LINK = 256
-CHAR_SET = r'[a-zA-Z0-9]+'
-MESSAGE_EXISTS_SHORT_URL = 'Предложенный вариант короткой ссылки уже существует.'
-MESSAGE_CREATE_URL = 'Ваша новая ссылка готова:'
-MESSAGE_NOT_EXISTS_BODY = 'Отсутствует тело запроса'
-MESSAGE_REQUIRED_FIELD = '"url" является обязательным полем!'
-MESSAGE_INVALID_VALUE = 'Указано недопустимое имя для короткой ссылки'
-MESSAGE_NOT_FOUND = 'Указанный id не найден'
 INDEX_TEMPLATE = 'index.html'
 REDIRECT_VIEW = 'redirect_view'
+MESSAGE_NOT_FOUND = 'Указанный id не найден'

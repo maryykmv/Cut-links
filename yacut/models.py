@@ -8,11 +8,21 @@ from flask import flash, url_for, render_template
 
 from . import db
 from .constants import (MAX_LENGTH_LONG_LINK, MAX_LENGTH_SHORT_ID,
-                        LENGTH_SHORT_ID, MESSAGE_NOT_EXISTS_BODY,
-                        CHAR_SET, MESSAGE_REQUIRED_FIELD,
-                        MESSAGE_INVALID_VALUE, MESSAGE_EXISTS_SHORT_URL,
-                        REDIRECT_VIEW, INDEX_TEMPLATE, MESSAGE_CREATE_URL)
+                        LENGTH_SHORT_ID, INDEX_TEMPLATE,
+                        REDIRECT_VIEW)
 from .error_handlers import InvalidAPIUsage
+
+CHAR_SET = r'[a-zA-Z0-9]'
+MESSAGE_EXISTS_SHORT_URL = (
+    'Предложенный вариант короткой ссылки уже существует.')
+MESSAGE_CREATE_URL = 'Ваша новая ссылка готова:'
+MESSAGE_NOT_EXISTS_BODY = 'Отсутствует тело запроса'
+MESSAGE_REQUIRED_FIELD = '"url" является обязательным полем!'
+MESSAGE_INVALID_VALUE = 'Указано недопустимое имя для короткой ссылки'
+
+
+def check_symbols(short_id):
+    return ''.join(re.findall(CHAR_SET, short_id)) == short_id
 
 
 class URLMap(db.Model):
@@ -58,10 +68,11 @@ class URLMap(db.Model):
         else:
             short_id = data['custom_id']
         if (len(short_id) > MAX_LENGTH_SHORT_ID
-                or not re.fullmatch(CHAR_SET, short_id)):
+                or not check_symbols(short_id)):
             raise InvalidAPIUsage(MESSAGE_INVALID_VALUE, HTTPStatus.BAD_REQUEST)
         if self.is_short_url_exists(short_id) is not None:
-            raise InvalidAPIUsage(MESSAGE_EXISTS_SHORT_URL, HTTPStatus.BAD_REQUEST)
+            raise InvalidAPIUsage(
+                MESSAGE_EXISTS_SHORT_URL, HTTPStatus.BAD_REQUEST)
         data['original'] = data['url']
         data['short'] = short_id
         self.from_dict(data)
@@ -77,7 +88,7 @@ class URLMap(db.Model):
         else:
             short_id = form.custom_id.data
         if (len(short_id) > MAX_LENGTH_SHORT_ID
-                or not re.fullmatch(CHAR_SET, short_id)):
+                or not check_symbols(short_id)):
             flash(MESSAGE_INVALID_VALUE)
             short_id = URLMap().get_unique_short_id()
         if URLMap().is_short_url_exists(short_id):
@@ -91,3 +102,6 @@ class URLMap(db.Model):
         db.session.add(url_map)
         db.session.commit()
         flash(MESSAGE_CREATE_URL)
+        flash(url_for(
+            REDIRECT_VIEW, short=form.custom_id.data, _external=True
+        ), 'url')

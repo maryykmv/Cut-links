@@ -1,15 +1,9 @@
-import re
-
 from flask import redirect, render_template
 
 from . import app
-from .constants import (CHAR_SET, INDEX_TEMPLATE)
+from .constants import INDEX_TEMPLATE
 from .forms import URLMapForm
 from .models import URLMap
-
-
-def check_symbols(short_id):
-    return re.fullmatch(CHAR_SET, short_id)
 
 
 @app.route('/', methods=['GET', 'POST'])

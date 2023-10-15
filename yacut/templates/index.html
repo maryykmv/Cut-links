@@ -45,17 +45,16 @@
         </div>
         <div class="col-sm">
           <p class="text-center">
-            {% with messages = get_flashed_messages() %}
-              {% if messages %}
-                {% for message in messages %}
-                  <h5 class="text-center">{{ message }}</h5>
-                {% endfor %}
-                <a href="{{ url_for('redirect_view', short=form.custom_id.data, _external=True) }}" >
-                  {{ url_for('redirect_view', short=form.custom_id.data, _external=True) }}
-                </a>
+            {% for category, message in get_flashed_messages(with_categories=true) %}
+              {% if category == "url" %}
+                <h5 class="text-center">
+                  <a href="{{ message }}">{{ message }}</a>
+                </h5>
+              {% else %}
+                <h5 class="text-center">{{ message }}</h5>
               {% endif %}
-            {% endwith %}
-          </p>
+            {% endfor %}  
+          </p>  
         </div>
         <div class="col-sm">
         </div>
