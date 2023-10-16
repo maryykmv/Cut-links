@@ -1,12 +1,15 @@
-from flask import flash, redirect, render_template
+from flask import flash, redirect, render_template, url_for
 
 from . import app
 
 from .constants import (INDEX_TEMPLATE, MAX_LENGTH_SHORT_ID,
                         INDEX_TEMPLATE, MESSAGE_INVALID_VALUE,
-                        MESSAGE_EXISTS_SHORT_URL)
+                        MESSAGE_EXISTS_SHORT_URL, REDIRECT_VIEW)
 from .forms import URLMapForm
 from .models import URLMap
+
+
+MESSAGE_CREATE_URL = 'Ваша новая ссылка готова:'
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -27,6 +30,10 @@ def index_view():
             flash(MESSAGE_EXISTS_SHORT_URL)
             return render_template(INDEX_TEMPLATE, form=form)
         form.custom_id.data = short_id
+        flash(MESSAGE_CREATE_URL)
+        flash(url_for(
+            REDIRECT_VIEW, short=short_id, _external=True
+        ), 'url')
         URLMap().data(short_id, url)
     return render_template(INDEX_TEMPLATE, form=form)
 

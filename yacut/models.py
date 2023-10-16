@@ -3,8 +3,8 @@ import random
 import re
 
 from flask import flash, url_for
-
 from . import db
+
 from .constants import (MAX_LENGTH_LONG_LINK, MAX_LENGTH_SHORT_ID,
                         LENGTH_SHORT_ID, REDIRECT_VIEW)
 from settings import CHARACTERS
@@ -17,6 +17,7 @@ MESSAGE_REQUIRED_FIELD = '"url" является обязательным пол
 
 
 class URLMap(db.Model):
+    __tablename__ = 'URLMap'
     id = db.Column(db.Integer, primary_key=True)
     original = db.Column(db.String(MAX_LENGTH_LONG_LINK), nullable=False)
     short = db.Column(db.String(MAX_LENGTH_SHORT_ID), unique=True)
@@ -51,9 +52,9 @@ class URLMap(db.Model):
         self.short = short_id
         db.session.add(self)
         db.session.commit()
-        flash(MESSAGE_CREATE_URL)
-        flash(url_for(
-            REDIRECT_VIEW, short=short_id, _external=True
-        ), 'url')
+        # flash(MESSAGE_CREATE_URL)
+        # flash(url_for(
+        #     REDIRECT_VIEW, short=short_id, _external=True
+        # ), 'url')
         self.short = url_for(REDIRECT_VIEW, short=self.short, _external=True)
         return self.to_representation(True)
