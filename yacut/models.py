@@ -22,6 +22,7 @@ class URLMap(db.Model):
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
 
     def to_representation(self, value=False):
+        self.short = url_for(REDIRECT_VIEW, short=self.short, _external=True)
         if value:
             return dict(
                 url=self.original,
@@ -53,9 +54,4 @@ class URLMap(db.Model):
         self.short = short_id
         db.session.add(self)
         db.session.commit()
-        # flash(MESSAGE_CREATE_URL)
-        # flash(url_for(
-        #     REDIRECT_VIEW, short=short_id, _external=True
-        # ), 'url')
-        self.short = url_for(REDIRECT_VIEW, short=self.short, _external=True)
         return self.to_representation(True)

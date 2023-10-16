@@ -34,6 +34,13 @@ def index_view():
         flash(url_for(
             REDIRECT_VIEW, short=short_id, _external=True
         ), 'url')
+        # если передавать в контектсе, то падает тест
+        # FAILED tests/test_views.py::test_len_short_id_form - 
+        # AssertionError: Если через форму отправлено имя короткой ссылки
+        # длиннее 16 символов - на странице должно отобразиться
+        # form.custom_id.data = url_for(
+        #     REDIRECT_VIEW, short=short_id, _external=True
+        # )
         URLMap().data(short_id, url)
     return render_template(INDEX_TEMPLATE, form=form)
 
