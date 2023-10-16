@@ -1,8 +1,7 @@
 from datetime import datetime
 import random
-import re
 
-from flask import flash, url_for
+from flask import url_for
 from . import db
 
 from .constants import (MAX_LENGTH_LONG_LINK, MAX_LENGTH_SHORT_ID,
@@ -10,7 +9,6 @@ from .constants import (MAX_LENGTH_LONG_LINK, MAX_LENGTH_SHORT_ID,
 from settings import CHARACTERS
 
 
-CHAR_SET = r'[a-zA-Z0-9]'
 MESSAGE_CREATE_URL = 'Ваша новая ссылка готова:'
 MESSAGE_NOT_EXISTS_BODY = 'Отсутствует тело запроса'
 MESSAGE_REQUIRED_FIELD = '"url" является обязательным полем!'
@@ -32,7 +30,10 @@ class URLMap(db.Model):
         return dict(url=self.original)
 
     def check_symbols(self, short_id):
-        return ''.join(re.findall(CHAR_SET, short_id)) == short_id
+        for char in short_id:
+            if char not in CHARACTERS:
+                return False
+        return True
 
     def get_unique_short_id(self):
         result = ''
