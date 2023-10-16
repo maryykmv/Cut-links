@@ -15,7 +15,6 @@ MESSAGE_REQUIRED_FIELD = '"url" является обязательным пол
 
 
 class URLMap(db.Model):
-    __tablename__ = 'URLMap'
     id = db.Column(db.Integer, primary_key=True)
     original = db.Column(db.String(MAX_LENGTH_LONG_LINK), nullable=False)
     short = db.Column(db.String(MAX_LENGTH_SHORT_ID), unique=True)
