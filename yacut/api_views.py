@@ -3,6 +3,8 @@ from flask import jsonify, request
 
 from . import app
 
+from .constants import (MAX_LENGTH_SHORT_ID, MESSAGE_INVALID_VALUE,
+                        MESSAGE_EXISTS_SHORT_URL)
 from .error_handlers import InvalidAPIUsage
 from .models import URLMap
 
@@ -18,7 +20,18 @@ def add_short_url():
         raise InvalidAPIUsage(MESSAGE_NOT_EXISTS_BODY)
     if 'url' not in data:
         raise InvalidAPIUsage(MESSAGE_REQUIRED_FIELD)
-    return jsonify(URLMap().data_api(data)), HTTPStatus.CREATED
+    if ('custom_id' not in data or data['custom_id'] is None
+            or data['custom_id'] == ''):
+        short_id = URLMap().get_unique_short_id()
+    else:
+        short_id = data['custom_id']
+    if (len(short_id) > MAX_LENGTH_SHORT_ID
+            or not URLMap().check_symbols(short_id)):
+        raise InvalidAPIUsage(MESSAGE_INVALID_VALUE, HTTPStatus.BAD_REQUEST)
+    if URLMap().is_short_url_exists(short_id) is not None:
+        raise InvalidAPIUsage(
+            MESSAGE_EXISTS_SHORT_URL, HTTPStatus.BAD_REQUEST)
+    return jsonify(URLMap().data_api(short_id, data['url'])), HTTPStatus.CREATED
 
 
 @app.route('/api/id/<string:short_id>/', methods=['GET'])
