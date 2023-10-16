@@ -16,5 +16,4 @@ def index_view():
 
 @app.route('/<string:short>')
 def redirect_view(short):
-    url_map = URLMap().is_short_url_exists(short, True)
-    return redirect(url_map.original)
+    return redirect(URLMap().is_short_url_exists(short, True).original)

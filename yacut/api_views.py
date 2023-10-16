@@ -2,9 +2,11 @@ from http import HTTPStatus
 from flask import jsonify, request
 
 from . import app
-from .constants import MESSAGE_NOT_FOUND
+
 from .error_handlers import InvalidAPIUsage
 from .models import URLMap
+
+MESSAGE_NOT_FOUND = 'Указанный id не найден'
 
 
 @app.route('/api/id/', methods=['POST'])
