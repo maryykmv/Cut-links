@@ -31,7 +31,7 @@ def add_short_url():
     if URLMap().is_short_url_exists(short_id) is not None:
         raise InvalidAPIUsage(
             MESSAGE_EXISTS_SHORT_URL, HTTPStatus.BAD_REQUEST)
-    return jsonify(URLMap().data_api(short_id, data['url'])), HTTPStatus.CREATED
+    return jsonify(URLMap().data(short_id, data['url'])), HTTPStatus.CREATED
 
 
 @app.route('/api/id/<string:short_id>/', methods=['GET'])

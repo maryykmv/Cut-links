@@ -2,13 +2,11 @@ from datetime import datetime
 import random
 import re
 
-from flask import flash, url_for, render_template
+from flask import flash, url_for
 
 from . import db
 from .constants import (MAX_LENGTH_LONG_LINK, MAX_LENGTH_SHORT_ID,
-                        LENGTH_SHORT_ID, INDEX_TEMPLATE,
-                        REDIRECT_VIEW, MESSAGE_INVALID_VALUE,
-                        MESSAGE_EXISTS_SHORT_URL)
+                        LENGTH_SHORT_ID, REDIRECT_VIEW)
 from settings import CHARACTERS
 
 
@@ -48,35 +46,14 @@ class URLMap(db.Model):
             return self.query.filter_by(short=short_id).first_or_404()
         return self.query.filter_by(short=short_id).first()
 
-    def data_api(self, short_id, url):
+    def data(self, short_id, url):
         self.original = url
         self.short = short_id
         db.session.add(self)
         db.session.commit()
-        self.short = url_for(REDIRECT_VIEW, short=self.short, _external=True)
-        return self.to_representation(True)
-
-    def data_form(self, form):
-        short_id = form.custom_id.data
-        if short_id is None or short_id == '':
-            short_id = URLMap().get_unique_short_id()
-        else:
-            short_id = form.custom_id.data
-        if (len(short_id) > MAX_LENGTH_SHORT_ID
-                or not self.check_symbols(short_id)):
-            flash(MESSAGE_INVALID_VALUE)
-            short_id = URLMap().get_unique_short_id()
-        if URLMap().is_short_url_exists(short_id):
-            flash(MESSAGE_EXISTS_SHORT_URL)
-            return render_template(INDEX_TEMPLATE, form=form)
-        url_map = URLMap(
-            original=form.original_link.data,
-            short=short_id
-        )
-        form.custom_id.data = short_id
-        db.session.add(url_map)
-        db.session.commit()
         flash(MESSAGE_CREATE_URL)
         flash(url_for(
-            REDIRECT_VIEW, short=form.custom_id.data, _external=True
+            REDIRECT_VIEW, short=short_id, _external=True
         ), 'url')
+        self.short = url_for(REDIRECT_VIEW, short=self.short, _external=True)
+        return self.to_representation(True)
