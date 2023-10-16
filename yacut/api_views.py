@@ -7,11 +7,17 @@ from .error_handlers import InvalidAPIUsage
 from .models import URLMap
 
 MESSAGE_NOT_FOUND = 'Указанный id не найден'
+MESSAGE_REQUIRED_FIELD = '"url" является обязательным полем!'
+MESSAGE_NOT_EXISTS_BODY = 'Отсутствует тело запроса'
 
 
 @app.route('/api/id/', methods=['POST'])
 def add_short_url():
     data = request.get_json()
+    if data is None:
+        raise InvalidAPIUsage(MESSAGE_NOT_EXISTS_BODY)
+    if 'url' not in data:
+        raise InvalidAPIUsage(MESSAGE_REQUIRED_FIELD)
     return jsonify(URLMap().data_api(data)), HTTPStatus.CREATED
 
 
@@ -20,4 +26,4 @@ def get_original_url(short_id):
     url_map = URLMap().is_short_url_exists(short_id)
     if url_map is None:
         raise InvalidAPIUsage(MESSAGE_NOT_FOUND, HTTPStatus.NOT_FOUND)
-    return jsonify(url_map.to_dict()), HTTPStatus.OK
+    return jsonify(url_map.to_representation()), HTTPStatus.OK

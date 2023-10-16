@@ -11,6 +11,8 @@ from .constants import (MAX_LENGTH_LONG_LINK, MAX_LENGTH_SHORT_ID,
                         LENGTH_SHORT_ID, INDEX_TEMPLATE,
                         REDIRECT_VIEW)
 from .error_handlers import InvalidAPIUsage
+from settings import CHARACTERS
+
 
 CHAR_SET = r'[a-zA-Z0-9]'
 MESSAGE_EXISTS_SHORT_URL = (
@@ -26,13 +28,12 @@ def check_symbols(short_id):
 
 
 class URLMap(db.Model):
-    __tablename__ = 'URLMap'
     id = db.Column(db.Integer, primary_key=True)
     original = db.Column(db.String(MAX_LENGTH_LONG_LINK), nullable=False)
     short = db.Column(db.String(MAX_LENGTH_SHORT_ID), unique=True)
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
 
-    def to_dict(self, value=False):
+    def to_representation(self, value=False):
         if value:
             return dict(
                 url=self.original,
@@ -41,16 +42,16 @@ class URLMap(db.Model):
         return dict(url=self.original)
 
     def from_dict(self, data):
-        for field in ['original', 'short']:
-            if field in data:
-                setattr(self, field, data[field])
+        self.original = data['original']
+        self.short = data['short']
 
     def get_unique_short_id(self):
-        short_id = ''.join(random.sample(
-            string.ascii_letters + string.digits, LENGTH_SHORT_ID))
-        if self.is_short_url_exists(short_id):
-            self.get_unique_short_id()
-        return short_id
+        result = ''
+        while len(result) != LENGTH_SHORT_ID:
+            result += random.choice(CHARACTERS)
+        if not self.is_short_url_exists(result):
+            return result
+        return self.get_unique_short_id()
 
     def is_short_url_exists(self, short_id, first_404=False):
         if first_404:
@@ -58,10 +59,6 @@ class URLMap(db.Model):
         return self.query.filter_by(short=short_id).first()
 
     def data_api(self, data):
-        if data is None:
-            raise InvalidAPIUsage(MESSAGE_NOT_EXISTS_BODY)
-        if 'url' not in data:
-            raise InvalidAPIUsage(MESSAGE_REQUIRED_FIELD)
         if ('custom_id' not in data or data['custom_id'] is None
                 or data['custom_id'] == ''):
             short_id = self.get_unique_short_id()
@@ -79,7 +76,7 @@ class URLMap(db.Model):
         db.session.add(self)
         db.session.commit()
         self.short = url_for(REDIRECT_VIEW, short=self.short, _external=True)
-        return self.to_dict(True)
+        return self.to_representation(True)
 
     def data_form(self, form):
         short_id = form.custom_id.data
