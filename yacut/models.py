@@ -1,4 +1,5 @@
 from datetime import datetime
+from http import HTTPStatus
 import random
 import re
 
@@ -7,7 +8,9 @@ from . import db
 
 from .constants import (MAX_LENGTH_LONG_LINK, MAX_LENGTH_SHORT,
                         LENGTH_SHORT, REDIRECT_VIEW, CHAR_SET,
-                        CHARACTERS)
+                        CHARACTERS, MESSAGE_INVALID_VALUE,
+                        MESSAGE_EXISTS_SHORT)
+from .error_handlers import InvalidAPIUsage
 
 
 MESSAGE_CREATE_URL = 'Ваша новая ссылка готова:'
@@ -46,6 +49,17 @@ class URLMap(db.Model):
         if first_404:
             return URLMap().query.filter_by(short=short).first_or_404()
         return URLMap().query.filter_by(short=short).first()
+
+    @staticmethod
+    def verification_data(short):
+        if (short is None or short == ''):
+            short = URLMap().get_unique_short()
+        if (len(short) > MAX_LENGTH_SHORT or URLMap().check_symbols(short)):
+            raise InvalidAPIUsage(MESSAGE_INVALID_VALUE, HTTPStatus.BAD_REQUEST)
+        if URLMap().get_short_url(short) is not None:
+            raise InvalidAPIUsage(
+                MESSAGE_EXISTS_SHORT, HTTPStatus.BAD_REQUEST)
+        return short
 
     def data(self, short, url):
         self.original = url

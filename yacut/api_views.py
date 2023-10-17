@@ -21,17 +21,10 @@ def add_short_url():
         raise InvalidAPIUsage(MESSAGE_NOT_EXISTS_BODY)
     if 'url' not in data:
         raise InvalidAPIUsage(MESSAGE_REQUIRED_FIELD)
-    if ('custom_id' not in data or data['custom_id'] is None
-            or data['custom_id'] == ''):
-        short = URLMap().get_unique_short()
+    if ('custom_id' not in data or data['custom_id'] is None or data['custom_id'] == ''):
+        short = URLMap().verification_data(short=None)
     else:
-        short = data['custom_id']
-    if (len(short) > MAX_LENGTH_SHORT
-            or URLMap().check_symbols(short)):
-        raise InvalidAPIUsage(MESSAGE_INVALID_VALUE, HTTPStatus.BAD_REQUEST)
-    if URLMap().get_short_url(short) is not None:
-        raise InvalidAPIUsage(
-            MESSAGE_EXISTS_SHORT, HTTPStatus.BAD_REQUEST)
+        short = URLMap().verification_data(data['custom_id'])
     return jsonify(URLMap().data(short, data['url'])), HTTPStatus.CREATED
 
 
