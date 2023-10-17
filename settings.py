@@ -1,8 +1,4 @@
 import os
-import string
-
-
-CHARACTERS = string.ascii_letters + string.digits
 
 
 class Config(object):

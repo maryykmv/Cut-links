@@ -2,9 +2,9 @@ from flask import flash, redirect, render_template, url_for
 
 from . import app
 
-from .constants import (INDEX_TEMPLATE, MAX_LENGTH_SHORT_ID,
+from .constants import (INDEX_TEMPLATE, MAX_LENGTH_SHORT,
                         INDEX_TEMPLATE, MESSAGE_INVALID_VALUE,
-                        MESSAGE_EXISTS_SHORT_URL, REDIRECT_VIEW)
+                        MESSAGE_EXISTS_SHORT, REDIRECT_VIEW)
 from .forms import URLMapForm
 from .models import URLMap
 
@@ -16,35 +16,28 @@ MESSAGE_CREATE_URL = 'Ваша новая ссылка готова:'
 def index_view():
     form = URLMapForm()
     if form.validate_on_submit():
-        short_id = form.custom_id.data
+        short = form.custom_id.data
         url = form.original_link.data
-        if short_id is None or short_id == '':
-            short_id = URLMap().get_unique_short_id()
+        if short is None or short == '':
+            short = URLMap().get_unique_short()
         else:
-            short_id = form.custom_id.data
-        if (len(short_id) > MAX_LENGTH_SHORT_ID
-                or not URLMap().check_symbols(short_id)):
+            short = form.custom_id.data
+        if (len(short) > MAX_LENGTH_SHORT
+                or URLMap().check_symbols(short)):
             flash(MESSAGE_INVALID_VALUE)
-            short_id = URLMap().get_unique_short_id()
-        if URLMap().is_short_url_exists(short_id):
-            flash(MESSAGE_EXISTS_SHORT_URL)
+            short = URLMap().get_unique_short()
+        if URLMap().get_short_url(short):
+            flash(MESSAGE_EXISTS_SHORT)
             return render_template(INDEX_TEMPLATE, form=form)
-        form.custom_id.data = short_id
+        form.custom_id.data = short
         flash(MESSAGE_CREATE_URL)
         flash(url_for(
-            REDIRECT_VIEW, short=short_id, _external=True
+            REDIRECT_VIEW, short=short, _external=True
         ), 'url')
-        # если передавать в контектсе, то падает тест
-        # FAILED tests/test_views.py::test_len_short_id_form
-        # AssertionError: Если через форму отправлено имя короткой ссылки
-        # длиннее 16 символов - на странице должно отобразиться
-        # form.custom_id.data = url_for(
-        #     REDIRECT_VIEW, short=short_id, _external=True
-        # )
-        URLMap().data(short_id, url)
+        URLMap().data(short, url)
     return render_template(INDEX_TEMPLATE, form=form)
 
 
 @app.route('/<string:short>')
 def redirect_view(short):
-    return redirect(URLMap().is_short_url_exists(short, True).original)
+    return redirect(URLMap().get_short_url(short, True).original)
