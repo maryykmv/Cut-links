@@ -3,7 +3,7 @@ from http import HTTPStatus
 import random
 import re
 
-from flask import url_for
+from flask import flash, url_for
 from . import db
 
 from .constants import (MAX_LENGTH_LONG_LINK, MAX_LENGTH_SHORT,
@@ -53,10 +53,12 @@ class URLMap(db.Model):
     @staticmethod
     def verification_data(short):
         if (short is None or short == ''):
-            short = URLMap().get_unique_short()
+            return URLMap().get_unique_short()
         if (len(short) > MAX_LENGTH_SHORT or URLMap().check_symbols(short)):
+            flash(MESSAGE_INVALID_VALUE), HTTPStatus.BAD_REQUEST
             raise InvalidAPIUsage(MESSAGE_INVALID_VALUE, HTTPStatus.BAD_REQUEST)
         if URLMap().get_short_url(short) is not None:
+            flash(MESSAGE_EXISTS_SHORT)
             raise InvalidAPIUsage(
                 MESSAGE_EXISTS_SHORT, HTTPStatus.BAD_REQUEST)
         return short

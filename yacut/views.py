@@ -2,8 +2,7 @@ from flask import flash, redirect, render_template, url_for
 
 from . import app
 
-from .constants import (INDEX_TEMPLATE, MAX_LENGTH_SHORT,
-                        INDEX_TEMPLATE, MESSAGE_INVALID_VALUE,
+from .constants import (INDEX_TEMPLATE, INDEX_TEMPLATE,
                         MESSAGE_EXISTS_SHORT, REDIRECT_VIEW)
 from .forms import URLMapForm
 from .models import URLMap
@@ -16,26 +15,19 @@ MESSAGE_CREATE_URL = 'Ваша новая ссылка готова:'
 def index_view():
     form = URLMapForm()
     if form.validate_on_submit():
-        short = form.custom_id.data
-        url = form.original_link.data
-        if short is None or short == '':
-            short = URLMap().get_unique_short()
+        if form.custom_id.data is None or form.custom_id.data == '':
+            short = URLMap().verification_data(short=None)
         else:
             short = form.custom_id.data
-        if (len(short) > MAX_LENGTH_SHORT
-                or URLMap().check_symbols(short)):
-            flash(MESSAGE_INVALID_VALUE)
-            short = URLMap().get_unique_short()
         if URLMap().get_short_url(short):
             flash(MESSAGE_EXISTS_SHORT)
             return render_template(INDEX_TEMPLATE, form=form)
         form.custom_id.data = short
+        URLMap().data(short, form.original_link.data)
         flash(MESSAGE_CREATE_URL)
-        flash(url_for(
-            REDIRECT_VIEW, short=short, _external=True
-        ), 'url')
-        URLMap().data(short, url)
-    return render_template(INDEX_TEMPLATE, form=form)
+        short_url = url_for(
+            REDIRECT_VIEW, short=form.custom_id.data, _external=True)
+    return render_template(INDEX_TEMPLATE, **locals())
 
 
 @app.route('/<string:short>')

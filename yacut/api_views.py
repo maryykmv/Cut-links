@@ -3,8 +3,7 @@ from http import HTTPStatus
 from flask import jsonify, request
 
 from . import app
-from .constants import (MAX_LENGTH_SHORT, MESSAGE_INVALID_VALUE,
-                        MESSAGE_EXISTS_SHORT)
+
 from .error_handlers import InvalidAPIUsage
 from .models import URLMap
 

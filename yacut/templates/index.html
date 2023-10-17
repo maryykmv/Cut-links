@@ -1,5 +1,4 @@
 {% extends "base.html" %} 
-{% block title %}Мнение о фильме # {{ opinion.id }}{%endblock %} 
 {% block content %}
 <main>
   <section class="container my-5 px-4">
@@ -45,13 +44,15 @@
         </div>
         <div class="col-sm">
           <p class="text-center">
-            {% for category, message in get_flashed_messages(with_categories=true) %}
-              {% if category == "url" %}
-                <h5 class="text-center"><a href="{{ message }}">{{ message }}</a></h5>
-              {% else %}<h5 class="text-center">{{ message }}</h5>
+            {% with messages = get_flashed_messages() %}
+              {% if messages %}
+                {% for message in messages %}
+                  <h5 class="text-center">{{ message }}</h5>
+                {% endfor %}
               {% endif %}
-            {% endfor %}  
-          </p>  
+              <h5 class="text-center"><a href="{{ short_url }}">{{ short_url }}</a></h5>
+            {% endwith %}
+          </p> 
         </div>
         <div class="col-sm">
         </div>
