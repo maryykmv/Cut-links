@@ -16,14 +16,10 @@ def index_view():
     form = URLMapForm()
     if form.validate_on_submit():
         if form.custom_id.data is None or form.custom_id.data == '':
-            short = URLMap().verification_data(short=None)
+            url_map = URLMap().data(short=None, url=form.original_link.data)
         else:
-            short = form.custom_id.data
-        if URLMap().get_short_url(short):
-            flash(MESSAGE_EXISTS_SHORT)
-            return render_template(INDEX_TEMPLATE, form=form)
-        form.custom_id.data = short
-        URLMap().data(short, form.original_link.data)
+            url_map = URLMap().data(form.custom_id.data, url=form.original_link.data)
+        form.custom_id.data = url_map['short_link']
         flash(MESSAGE_CREATE_URL)
         short_url = url_for(
             REDIRECT_VIEW, short=form.custom_id.data, _external=True)

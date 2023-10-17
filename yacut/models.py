@@ -3,11 +3,11 @@ from http import HTTPStatus
 import random
 import re
 
-from flask import flash, url_for
+from flask import flash
 from . import db
 
 from .constants import (MAX_LENGTH_LONG_LINK, MAX_LENGTH_SHORT,
-                        LENGTH_SHORT, REDIRECT_VIEW, CHAR_SET,
+                        LENGTH_SHORT, CHAR_SET,
                         CHARACTERS, MESSAGE_INVALID_VALUE,
                         MESSAGE_EXISTS_SHORT)
 from .error_handlers import InvalidAPIUsage
@@ -25,7 +25,6 @@ class URLMap(db.Model):
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
 
     def to_representation(self, value=False):
-        self.short = url_for(REDIRECT_VIEW, short=self.short, _external=True)
         if value:
             return dict(
                 url=self.original,
@@ -51,9 +50,9 @@ class URLMap(db.Model):
         return URLMap().query.filter_by(short=short).first()
 
     @staticmethod
-    def verification_data(short):
+    def data(short, url=None):
         if (short is None or short == ''):
-            return URLMap().get_unique_short()
+            short = URLMap().get_unique_short()
         if (len(short) > MAX_LENGTH_SHORT or URLMap().check_symbols(short)):
             flash(MESSAGE_INVALID_VALUE), HTTPStatus.BAD_REQUEST
             raise InvalidAPIUsage(MESSAGE_INVALID_VALUE, HTTPStatus.BAD_REQUEST)
@@ -61,11 +60,10 @@ class URLMap(db.Model):
             flash(MESSAGE_EXISTS_SHORT)
             raise InvalidAPIUsage(
                 MESSAGE_EXISTS_SHORT, HTTPStatus.BAD_REQUEST)
-        return short
-
-    def data(self, short, url):
-        self.original = url
-        self.short = short
-        db.session.add(self)
+        url_map = URLMap(
+            original=url,
+            short=short
+        )
+        db.session.add(url_map)
         db.session.commit()
-        return self.to_representation(True)
+        return url_map.to_representation(True)

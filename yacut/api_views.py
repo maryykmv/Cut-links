@@ -1,9 +1,10 @@
 from http import HTTPStatus
 
-from flask import jsonify, request
+from flask import jsonify, request, url_for
 
 from . import app
 
+from .constants import REDIRECT_VIEW
 from .error_handlers import InvalidAPIUsage
 from .models import URLMap
 
@@ -21,10 +22,12 @@ def add_short_url():
     if 'url' not in data:
         raise InvalidAPIUsage(MESSAGE_REQUIRED_FIELD)
     if ('custom_id' not in data or data['custom_id'] is None or data['custom_id'] == ''):
-        short = URLMap().verification_data(short=None)
+        url_map = URLMap().data(short=None, url=data['url'])
     else:
-        short = URLMap().verification_data(data['custom_id'])
-    return jsonify(URLMap().data(short, data['url'])), HTTPStatus.CREATED
+        url_map = URLMap().data(short=data['custom_id'], url=data['url'])
+    url_map['short_link'] = url_for(
+        REDIRECT_VIEW, short=url_map['short_link'], _external=True)
+    return jsonify(url_map), HTTPStatus.CREATED
 
 
 @app.route('/api/id/<string:short_id>/', methods=['GET'])
