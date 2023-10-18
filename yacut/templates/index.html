@@ -48,9 +48,16 @@
               {% for message in messages %}
                  <h5 class="text-center">{{ message }}</h5>
               {% endfor %}
-              <h5 class="text-center"><a href="{{ short_url }}">{{ short_url }}</a></h5>
             {% endwith %}
-          </p> 
+          </p>
+          <p class="text-center">
+            {% if short_url %}
+              <h5 class="text-center">
+                Ваша новая ссылка готова: </br>
+                <a href="{{ short_url }}">{{ short_url }}</a>
+              </h5>
+            {% endif %}
+          </p>
         </div>
         <div class="col-sm">
         </div>

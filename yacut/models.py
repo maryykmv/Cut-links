@@ -1,14 +1,11 @@
 from datetime import datetime
-from http import HTTPStatus
 import random
 import re
-
-from flask import flash
 
 from . import db
 from .constants import (MAX_LONG_LENGTH, MAX_SHORT_LENGTH,
                         SHORT_LENGTH, VALID_CHARACTERS,
-                        CHARACTERS, MESSAGE_INVALID_VALUE)
+                        CHARACTERS)
 
 
 MESSAGE_CREATE_URL = 'Ваша новая ссылка готова:'
@@ -19,6 +16,8 @@ MESSAGE_EXISTS_SHORT = (
 MESSAGE_LONG_INVALID = 'Размер длинной сылки превышает ограничение {}.'
 MESSAGE_SHORT_USE = 'Имя {} уже занято!'
 MESSAGE_SHORT_CREATE = 'Короткая ссылка не создана.'
+MESSAGE_INVALID_VALUE = 'Указано недопустимое имя для короткой ссылки'
+SHORT_CHARACTERS = VALID_CHARACTERS + f'{{1,{SHORT_LENGTH}}}'
 
 
 class URLMap(db.Model):
@@ -34,10 +33,6 @@ class URLMap(db.Model):
                 short_link=self.short
             )
         return dict(url=self.original)
-
-    @staticmethod
-    def check_symbols(short):
-        return set(re.sub(VALID_CHARACTERS, '', short))
 
     @staticmethod
     def get_unique_short():
@@ -59,11 +54,9 @@ class URLMap(db.Model):
             short = URLMap.get_unique_short()
         if len(url) > MAX_LONG_LENGTH:
             raise ValueError(MESSAGE_LONG_INVALID.format(MAX_LONG_LENGTH))
-        if (len(short) > MAX_SHORT_LENGTH or URLMap.check_symbols(short)):
-            flash(MESSAGE_INVALID_VALUE)
+        if not re.fullmatch(SHORT_CHARACTERS, short):
             raise ValueError(MESSAGE_INVALID_VALUE)
         if URLMap.get(short) is not None:
-            flash(MESSAGE_EXISTS_SHORT)
             raise ValueError(MESSAGE_EXISTS_SHORT)
         url_map = URLMap(
             original=url,
@@ -71,4 +64,4 @@ class URLMap(db.Model):
         )
         db.session.add(url_map)
         db.session.commit()
-        return url_map.to_representation(True)
+        return url_map
