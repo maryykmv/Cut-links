@@ -45,11 +45,9 @@
         <div class="col-sm">
           <p class="text-center">
             {% with messages = get_flashed_messages() %}
-              {% if messages %}
-                {% for message in messages %}
-                  <h5 class="text-center">{{ message }}</h5>
-                {% endfor %}
-              {% endif %}
+              {% for message in messages %}
+                 <h5 class="text-center">{{ message }}</h5>
+              {% endfor %}
               <h5 class="text-center"><a href="{{ short_url }}">{{ short_url }}</a></h5>
             {% endwith %}
           </p> 

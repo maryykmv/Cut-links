@@ -1,7 +1,6 @@
 from flask import flash, redirect, render_template, url_for
 
 from . import app
-
 from .constants import (INDEX_TEMPLATE, INDEX_TEMPLATE,
                         REDIRECT_VIEW)
 from .forms import URLMapForm
@@ -17,9 +16,9 @@ def index_view():
     try:
         if form.validate_on_submit():
             if form.custom_id.data is None or form.custom_id.data == '':
-                url_map = URLMap().data(short=None, url=form.original_link.data)
+                url_map = URLMap.data(short=None, url=form.original_link.data)
             else:
-                url_map = URLMap().data(short=form.custom_id.data, url=form.original_link.data)
+                url_map = URLMap.data(short=form.custom_id.data, url=form.original_link.data)
             flash(MESSAGE_CREATE_URL)
             form.custom_id.data = url_map['short_link']
             short_url = url_for(
@@ -31,4 +30,4 @@ def index_view():
 
 @app.route('/<string:short>')
 def redirect_view(short):
-    return redirect(URLMap().get_short_url(short, True).original)
+    return redirect(URLMap.get_short_url(short, True).original)
