@@ -1,3 +1,4 @@
+import re
 import string
 
 
@@ -8,4 +9,4 @@ MAX_LONG_LENGTH = 2000
 INDEX_TEMPLATE = 'index.html'
 REDIRECT_VIEW = 'redirect_view'
 MESSAGE_INVALID_VALUE = 'Указано недопустимое имя для короткой ссылки'
-VALID_CHARACTERS = r'[a-zA-Z0-9]+'
+VALID_CHARACTERS = f'[{re.escape(CHARACTERS)}]'

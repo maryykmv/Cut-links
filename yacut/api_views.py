@@ -1,6 +1,6 @@
 from http import HTTPStatus
 
-from flask import jsonify, request, url_for, flash
+from flask import jsonify, request, url_for
 
 from . import app
 from .constants import REDIRECT_VIEW

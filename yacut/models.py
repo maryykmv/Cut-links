@@ -9,7 +9,6 @@ from . import db
 from .constants import (MAX_LONG_LENGTH, MAX_SHORT_LENGTH,
                         SHORT_LENGTH, VALID_CHARACTERS,
                         CHARACTERS, MESSAGE_INVALID_VALUE)
-from .error_handlers import InvalidAPIUsage
 
 
 MESSAGE_CREATE_URL = 'Ваша новая ссылка готова:'
