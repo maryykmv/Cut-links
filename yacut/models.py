@@ -56,11 +56,11 @@ class URLMap(db.Model):
             short = URLMap.get_unique_short()
         if (len(short) > MAX_SHORT_LENGTH or URLMap.check_symbols(short)):
             flash(MESSAGE_INVALID_VALUE), HTTPStatus.BAD_REQUEST
-            raise InvalidAPIUsage(MESSAGE_INVALID_VALUE, HTTPStatus.BAD_REQUEST)
+            raise ValueError(MESSAGE_INVALID_VALUE)
         if URLMap.get_short_url(short) is not None:
             flash(MESSAGE_EXISTS_SHORT)
-            raise InvalidAPIUsage(
-                MESSAGE_EXISTS_SHORT, HTTPStatus.BAD_REQUEST)
+            raise ValueError(
+                MESSAGE_EXISTS_SHORT)
         url_map = URLMap(
             original=url,
             short=short
