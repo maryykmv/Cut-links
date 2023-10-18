@@ -8,6 +8,7 @@ PLACEHOLDER_LONG_LINK = 'Длинная ссылка'
 PLACEHOLDER_SHORT_LINK = 'Ваш вариант короткой ссылки'
 REQUIRED_FIELD = 'Обязательное поле'
 LABEL_BUTTON_CREATE = 'Создать'
+MESSAGE_CHAR_VALID = 'Вводите буквы латинского алфавита и цифры'
 
 
 class URLMapForm(FlaskForm):
@@ -20,7 +21,7 @@ class URLMapForm(FlaskForm):
         PLACEHOLDER_SHORT_LINK,
         validators=[
             Length(max=MAX_SHORT_LENGTH),
-            Regexp(VALID_CHARACTERS),
+            Regexp(VALID_CHARACTERS, message=MESSAGE_CHAR_VALID),
             Optional(strip_whitespace=False)
         ]
     )
