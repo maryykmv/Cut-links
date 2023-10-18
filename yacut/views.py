@@ -13,21 +13,19 @@ MESSAGE_CREATE_URL = 'Ваша новая ссылка готова:'
 @app.route('/', methods=['GET', 'POST'])
 def index_view():
     form = URLMapForm()
+    if not form.validate_on_submit():
+        return render_template(INDEX_TEMPLATE, form=form)
     try:
-        if form.validate_on_submit():
-            if form.custom_id.data is None or form.custom_id.data == '':
-                url_map = URLMap.data(short=None, url=form.original_link.data)
-            else:
-                url_map = URLMap.data(short=form.custom_id.data, url=form.original_link.data)
-            flash(MESSAGE_CREATE_URL)
-            form.custom_id.data = url_map['short_link']
-            short_url = url_for(
-                REDIRECT_VIEW, short=form.custom_id.data, _external=True)
-    except Exception:
-        pass
+        data = URLMap.create_data(short=form.custom_id.data, url=form.original_link.data)
+        flash(MESSAGE_CREATE_URL)
+        form.custom_id.data = data['short_link']
+        short_url = url_for(
+            REDIRECT_VIEW, short=form.custom_id.data, _external=True)
+    except ValueError as error:
+        flash(str(error))
     return render_template(INDEX_TEMPLATE, **locals())
 
 
 @app.route('/<string:short>')
 def redirect_view(short):
-    return redirect(URLMap.get_short_url(short, True).original)
+    return redirect(URLMap.get(short, True).original)
