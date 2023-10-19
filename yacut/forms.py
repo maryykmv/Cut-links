@@ -2,7 +2,8 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, URLField
 from wtforms.validators import DataRequired, Length, Optional, Regexp
 
-from .constants import MAX_LONG_LENGTH, MAX_SHORT_LENGTH, VALID_CHARACTERS
+from .constants import (MAX_LONG_LENGTH, MAX_SHORT_LENGTH,
+                        VALID_CHARACTERS_FORM)
 
 PLACEHOLDER_LONG_LINK = 'Длинная ссылка'
 PLACEHOLDER_SHORT_LINK = 'Ваш вариант короткой ссылки'
@@ -11,6 +12,7 @@ LABEL_BUTTON_CREATE = 'Создать'
 MESSAGE_CHAR_VALID = 'Вводите буквы латинского алфавита и цифры'
 MESSAGE_SHORT_INVALID_VALUE = 'Указано недопустимое имя для короткой ссылки'
 MESSAGE_LONG_INVALID_VALUE = 'Указано недопустимое имя для длинной ссылки'
+PATTERN_SHORT = f'^{VALID_CHARACTERS_FORM}+$'
 
 
 class URLMapForm(FlaskForm):
@@ -26,7 +28,7 @@ class URLMapForm(FlaskForm):
         PLACEHOLDER_SHORT_LINK,
         validators=[
             Length(max=MAX_SHORT_LENGTH, message=MESSAGE_SHORT_INVALID_VALUE),
-            Regexp(VALID_CHARACTERS, message=MESSAGE_CHAR_VALID),
+            Regexp(PATTERN_SHORT, message=MESSAGE_CHAR_VALID),
             Optional(strip_whitespace=False)
         ]
     )

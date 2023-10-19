@@ -24,15 +24,13 @@ class URLMap(db.Model):
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
 
     def to_representation(self, value=False):
-        if value:
-            return dict(
-                url=self.original,
-                short_link=url_for(
-                    REDIRECT_VIEW,
-                    short=self.short,
-                    _external=True)
-            )
-        return dict(url=self.original)
+        return dict(
+            url=self.original,
+            short_link=url_for(
+                REDIRECT_VIEW,
+                short=self.short,
+                _external=True)
+        )
 
     @staticmethod
     def get_unique_short():

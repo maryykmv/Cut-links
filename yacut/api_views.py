@@ -27,7 +27,7 @@ def add_short_url():
         )
     except ValueError as error:
         raise InvalidAPIUsage(str(error))
-    return jsonify(data.to_representation(True)), HTTPStatus.CREATED
+    return jsonify(data.to_representation()), HTTPStatus.CREATED
 
 
 @app.route('/api/id/<string:short_id>/', methods=['GET'])
@@ -35,4 +35,4 @@ def get_original_url(short_id):
     url_map = URLMap.get(short_id)
     if url_map is None:
         raise InvalidAPIUsage(MESSAGE_NOT_FOUND, HTTPStatus.NOT_FOUND)
-    return jsonify(url_map.to_representation()), HTTPStatus.OK
+    return jsonify({"url": url_map.original}), HTTPStatus.OK

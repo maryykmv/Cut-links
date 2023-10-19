@@ -9,3 +9,4 @@ MAX_LONG_LENGTH = 2000
 REDIRECT_VIEW = 'redirect_view'
 INDEX_TEMPLATE = 'index.html'
 VALID_CHARACTERS = f'[{re.compile(CHARACTERS)}]{{1,{SHORT_LENGTH}}}'
+VALID_CHARACTERS_FORM = f'[{re.compile(CHARACTERS)}]'
