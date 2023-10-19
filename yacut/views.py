@@ -12,14 +12,12 @@ def index_view():
     if not form.validate_on_submit():
         return render_template(INDEX_TEMPLATE, form=form)
     try:
-        data = URLMap.create_data(
+        form.custom_id.data = URLMap.create(
             short=form.custom_id.data,
             url=form.original_link.data
-        )
+        ).short
     except ValueError as error:
         flash(str(error))
-    else:
-        form.custom_id.data = data.short
     return render_template(
         INDEX_TEMPLATE,
         form=form,

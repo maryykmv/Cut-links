@@ -23,7 +23,7 @@ class URLMap(db.Model):
     short = db.Column(db.String(MAX_SHORT_LENGTH), unique=True)
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
 
-    def to_representation(self, value=False):
+    def to_representation(self):
         return dict(
             url=self.original,
             short_link=url_for(
@@ -34,7 +34,7 @@ class URLMap(db.Model):
 
     @staticmethod
     def get_unique_short():
-        for _ in range(len(VALID_CHARACTERS)):
+        for _ in range(SHORT_LENGTH):
             short = ''.join(random.choices(CHARACTERS, k=SHORT_LENGTH))
             if not URLMap.get(short):
                 return short
@@ -47,12 +47,14 @@ class URLMap(db.Model):
         return URLMap.query.filter_by(short=short).first()
 
     @staticmethod
-    def create_data(short, url=None, validate=False):
+    def create(short, url=None, validate=False):
         if (short is None or short == ''):
             short = URLMap.get_unique_short()
-        if validate:
+        elif validate:
             if len(url) > MAX_LONG_LENGTH:
                 raise ValueError(MESSAGE_LONG_INVALID.format(MAX_LONG_LENGTH))
+            if len(short) > MAX_SHORT_LENGTH:
+                raise ValueError(MESSAGE_INVALID_VALUE.format(MAX_SHORT_LENGTH))
             if not re.fullmatch(VALID_CHARACTERS, short):
                 raise ValueError(MESSAGE_INVALID_VALUE)
         if URLMap.get(short) is not None:
