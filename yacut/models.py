@@ -2,10 +2,12 @@ from datetime import datetime
 import random
 import re
 
+from flask import url_for
+
 from . import db
 from .constants import (MAX_LONG_LENGTH, MAX_SHORT_LENGTH,
                         SHORT_LENGTH, VALID_CHARACTERS,
-                        CHARACTERS)
+                        CHARACTERS, REDIRECT_VIEW)
 
 
 MESSAGE_CREATE_URL = 'Ваша новая ссылка готова:'
@@ -30,7 +32,10 @@ class URLMap(db.Model):
         if value:
             return dict(
                 url=self.original,
-                short_link=self.short
+                short_link=url_for(
+                    REDIRECT_VIEW,
+                    short=self.short,
+                    _external=True)
             )
         return dict(url=self.original)
 
