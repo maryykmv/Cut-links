@@ -6,19 +6,23 @@ from .forms import URLMapForm
 from .models import URLMap
 
 
+MESSAGE_SHORT_USE = 'Имя {} уже занято!'
+
+
 @app.route('/', methods=['GET', 'POST'])
 def index_view():
     form = URLMapForm()
     if not form.validate_on_submit():
         return render_template(INDEX_TEMPLATE, form=form)
     try:
-        url = URLMap.create_data(
+        data = URLMap.create_data(
             short=form.custom_id.data,
             url=form.original_link.data
         )
-        form.custom_id.data = url.short
     except ValueError as error:
         flash(str(error))
+    else:
+        form.custom_id.data = data.short
     return render_template(
         INDEX_TEMPLATE,
         form=form,

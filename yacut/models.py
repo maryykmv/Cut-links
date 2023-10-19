@@ -42,9 +42,9 @@ class URLMap(db.Model):
     @staticmethod
     def get_unique_short():
         for _ in range(len(VALID_CHARACTERS)):
-            unique_short = ''.join(random.choices(CHARACTERS, k=SHORT_LENGTH))
-            if not URLMap.get(unique_short):
-                return unique_short
+            short = ''.join(random.choices(CHARACTERS, k=SHORT_LENGTH))
+            if not URLMap.get(short):
+                return short
         raise ValueError(MESSAGE_SHORT_CREATE)
 
     @staticmethod
@@ -57,8 +57,6 @@ class URLMap(db.Model):
     def create_data(short, url=None):
         if (short is None or short == ''):
             short = URLMap.get_unique_short()
-        if len(url) > MAX_LONG_LENGTH:
-            raise ValueError(MESSAGE_LONG_INVALID.format(MAX_LONG_LENGTH))
         if not re.fullmatch(SHORT_CHARACTERS, short):
             raise ValueError(MESSAGE_INVALID_VALUE)
         if URLMap.get(short) is not None:
