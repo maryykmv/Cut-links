@@ -10,16 +10,11 @@ from .constants import (MAX_LONG_LENGTH, MAX_SHORT_LENGTH,
                         CHARACTERS, REDIRECT_VIEW)
 
 
-MESSAGE_CREATE_URL = 'Ваша новая ссылка готова:'
-MESSAGE_NOT_EXISTS_BODY = 'Отсутствует тело запроса'
-MESSAGE_REQUIRED_FIELD = '"url" является обязательным полем!'
 MESSAGE_EXISTS_SHORT = (
     'Предложенный вариант короткой ссылки уже существует.')
-MESSAGE_LONG_INVALID = 'Размер длинной сылки превышает ограничение {}.'
-MESSAGE_SHORT_USE = 'Имя {} уже занято!'
 MESSAGE_SHORT_CREATE = 'Короткая ссылка не создана.'
 MESSAGE_INVALID_VALUE = 'Указано недопустимое имя для короткой ссылки'
-SHORT_CHARACTERS = VALID_CHARACTERS + f'{{1,{SHORT_LENGTH}}}'
+MESSAGE_LONG_INVALID = 'Размер длинной сылки превышает ограничение {}.'
 
 
 class URLMap(db.Model):
@@ -54,11 +49,14 @@ class URLMap(db.Model):
         return URLMap.query.filter_by(short=short).first()
 
     @staticmethod
-    def create_data(short, url=None):
+    def create_data(short, url=None, validate=False):
         if (short is None or short == ''):
             short = URLMap.get_unique_short()
-        if not re.fullmatch(SHORT_CHARACTERS, short):
-            raise ValueError(MESSAGE_INVALID_VALUE)
+        if validate:
+            if len(url) > MAX_LONG_LENGTH:
+                raise ValueError(MESSAGE_LONG_INVALID.format(MAX_LONG_LENGTH))
+            if not re.fullmatch(VALID_CHARACTERS, short):
+                raise ValueError(MESSAGE_INVALID_VALUE)
         if URLMap.get(short) is not None:
             raise ValueError(MESSAGE_EXISTS_SHORT)
         url_map = URLMap(

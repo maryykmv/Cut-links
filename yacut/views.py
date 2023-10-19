@@ -6,9 +6,6 @@ from .forms import URLMapForm
 from .models import URLMap
 
 
-MESSAGE_SHORT_USE = 'Имя {} уже занято!'
-
-
 @app.route('/', methods=['GET', 'POST'])
 def index_view():
     form = URLMapForm()

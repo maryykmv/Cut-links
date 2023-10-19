@@ -20,7 +20,11 @@ def add_short_url():
     if 'url' not in data:
         raise InvalidAPIUsage(MESSAGE_REQUIRED_FIELD)
     try:
-        data = URLMap.create_data(short=data.get('custom_id'), url=data['url'])
+        data = URLMap.create_data(
+            short=data.get('custom_id'),
+            url=data.get('url'),
+            validate=True
+        )
     except ValueError as error:
         raise InvalidAPIUsage(str(error))
     return jsonify(data.to_representation(True)), HTTPStatus.CREATED
