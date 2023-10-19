@@ -7,7 +7,7 @@ from flask import url_for
 from . import db
 from .constants import (MAX_LONG_LENGTH, MAX_SHORT_LENGTH,
                         SHORT_LENGTH, VALID_CHARACTERS,
-                        CHARACTERS, REDIRECT_VIEW)
+                        CHARACTERS, REDIRECT_VIEW, GENERATION_COUNT)
 
 
 MESSAGE_EXISTS_SHORT = (
@@ -34,7 +34,7 @@ class URLMap(db.Model):
 
     @staticmethod
     def get_unique_short():
-        for _ in range(SHORT_LENGTH):
+        for _ in range(GENERATION_COUNT):
             short = ''.join(random.choices(CHARACTERS, k=SHORT_LENGTH))
             if not URLMap.get(short):
                 return short
@@ -48,17 +48,17 @@ class URLMap(db.Model):
 
     @staticmethod
     def create(short, url=None, validate=False):
-        if (short is None or short == ''):
+        if short is None or short == '':
             short = URLMap.get_unique_short()
-        elif validate:
+        elif URLMap.get(short):
+            raise ValueError(MESSAGE_EXISTS_SHORT)
+        if validate or short is None or short == '':
             if len(url) > MAX_LONG_LENGTH:
                 raise ValueError(MESSAGE_LONG_INVALID.format(MAX_LONG_LENGTH))
             if len(short) > MAX_SHORT_LENGTH:
                 raise ValueError(MESSAGE_INVALID_VALUE.format(MAX_SHORT_LENGTH))
             if not re.fullmatch(VALID_CHARACTERS, short):
                 raise ValueError(MESSAGE_INVALID_VALUE)
-        if URLMap.get(short) is not None:
-            raise ValueError(MESSAGE_EXISTS_SHORT)
         url_map = URLMap(
             original=url,
             short=short

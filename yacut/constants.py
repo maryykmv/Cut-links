@@ -9,3 +9,4 @@ MAX_LONG_LENGTH = 2000
 REDIRECT_VIEW = 'redirect_view'
 INDEX_TEMPLATE = 'index.html'
 VALID_CHARACTERS = f'^[{re.escape(CHARACTERS)}]+$'
+GENERATION_COUNT = 10

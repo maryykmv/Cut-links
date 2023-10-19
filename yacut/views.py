@@ -9,22 +9,24 @@ from .models import URLMap
 @app.route('/', methods=['GET', 'POST'])
 def index_view():
     form = URLMapForm()
+    short_url = None
     if not form.validate_on_submit():
         return render_template(INDEX_TEMPLATE, form=form)
     try:
-        form.custom_id.data = URLMap.create(
-            short=form.custom_id.data,
-            url=form.original_link.data
-        ).short
+        short_url = url_for(
+            REDIRECT_VIEW,
+            short=URLMap.create(
+                short=form.custom_id.data,
+                url=form.original_link.data
+            ).short,
+            _external=True
+        )
     except ValueError as error:
         flash(str(error))
     return render_template(
         INDEX_TEMPLATE,
         form=form,
-        short_url=url_for(
-            REDIRECT_VIEW,
-            short=form.custom_id.data,
-            _external=True)
+        short_url=short_url
     )
 
 
