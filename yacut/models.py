@@ -50,15 +50,16 @@ class URLMap(db.Model):
     def create(short, url=None, validate=False):
         if short is None or short == '':
             short = URLMap.get_unique_short()
-        elif URLMap.get(short):
-            raise ValueError(MESSAGE_EXISTS_SHORT)
-        if validate or short is None or short == '':
-            if len(url) > MAX_LONG_LENGTH:
-                raise ValueError(MESSAGE_LONG_INVALID.format(MAX_LONG_LENGTH))
-            if len(short) > MAX_SHORT_LENGTH:
-                raise ValueError(MESSAGE_INVALID_VALUE.format(MAX_SHORT_LENGTH))
-            if not re.fullmatch(VALID_CHARACTERS, short):
-                raise ValueError(MESSAGE_INVALID_VALUE)
+        else:
+            if validate:
+                if len(url) > MAX_LONG_LENGTH:
+                    raise ValueError(MESSAGE_LONG_INVALID.format(MAX_LONG_LENGTH))
+                if len(short) > MAX_SHORT_LENGTH:
+                    raise ValueError(MESSAGE_INVALID_VALUE.format(MAX_SHORT_LENGTH))
+                if not re.fullmatch(VALID_CHARACTERS, short):
+                    raise ValueError(MESSAGE_INVALID_VALUE)
+            if URLMap.get(short):
+                raise ValueError(MESSAGE_EXISTS_SHORT)
         url_map = URLMap(
             original=url,
             short=short
