@@ -22,7 +22,8 @@ def add_short_url():
     try:
         url_map = URLMap.create(
             short=data.get('custom_id'),
-            url=data.get('url')
+            url=data.get('url'),
+            validate=True
         )
     except ValueError as error:
         raise InvalidAPIUsage(str(error))
