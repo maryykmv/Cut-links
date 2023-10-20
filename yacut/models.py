@@ -47,21 +47,20 @@ class URLMap(db.Model):
         return URLMap.query.filter_by(short=short).first()
 
     @staticmethod
-    def create(short, url=None, validate=False):
-        if short is None or short == '':
-            short = URLMap.get_unique_short()
-        else:
-            if validate:
-                if len(short) > MAX_SHORT_LENGTH:
-                    raise ValueError(
-                        MESSAGE_INVALID_VALUE.format(MAX_SHORT_LENGTH)
-                    )
-                if not re.fullmatch(VALID_CHARACTERS, short):
-                    raise ValueError(MESSAGE_INVALID_VALUE)
+    def create(short, url):
+        if short:
+            if len(short) > MAX_SHORT_LENGTH:
+                raise ValueError(
+                    MESSAGE_INVALID_VALUE.format(MAX_SHORT_LENGTH)
+                )
+            if not re.fullmatch(VALID_CHARACTERS, short):
+                raise ValueError(MESSAGE_INVALID_VALUE)
             if URLMap.get(short):
                 raise ValueError(MESSAGE_EXISTS_SHORT)
-            if len(url) > MAX_LONG_LENGTH:
-                raise ValueError(MESSAGE_LONG_INVALID.format(MAX_LONG_LENGTH))
+        else:
+            short = URLMap.get_unique_short()
+        if len(url) > MAX_LONG_LENGTH:
+            raise ValueError(MESSAGE_LONG_INVALID.format(MAX_LONG_LENGTH))
         url_map = URLMap(
             original=url,
             short=short
