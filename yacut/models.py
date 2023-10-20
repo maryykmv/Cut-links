@@ -56,10 +56,10 @@ class URLMap(db.Model):
                     )
                 if not re.fullmatch(VALID_CHARACTERS, short):
                     raise ValueError(MESSAGE_INVALID_VALUE)
+                if len(url) > MAX_LONG_LENGTH:
+                    raise ValueError(MESSAGE_LONG_INVALID.format(MAX_LONG_LENGTH))
             if URLMap.get(short):
                 raise ValueError(MESSAGE_EXISTS_SHORT)
-            if len(url) > MAX_LONG_LENGTH:
-                raise ValueError(MESSAGE_LONG_INVALID.format(MAX_LONG_LENGTH))
         else:
             short = URLMap.get_unique_short()
         url_map = URLMap(
