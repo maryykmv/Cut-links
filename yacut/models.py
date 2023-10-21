@@ -48,6 +48,9 @@ class URLMap(db.Model):
 
     @staticmethod
     def create(short, url, validate=False):
+        if validate:
+            if len(url) > MAX_LONG_LENGTH:
+                raise ValueError(MESSAGE_LONG_INVALID.format(MAX_LONG_LENGTH))
         if short:
             if validate:
                 if len(short) > MAX_SHORT_LENGTH:
@@ -56,8 +59,6 @@ class URLMap(db.Model):
                     )
                 if not re.fullmatch(VALID_CHARACTERS, short):
                     raise ValueError(MESSAGE_INVALID_VALUE)
-            if len(url) > MAX_LONG_LENGTH:
-                raise ValueError(MESSAGE_LONG_INVALID.format(MAX_LONG_LENGTH))
             if URLMap.get(short):
                 raise ValueError(MESSAGE_EXISTS_SHORT)
         else:
